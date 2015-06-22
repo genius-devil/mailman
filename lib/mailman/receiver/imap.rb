@@ -75,7 +75,7 @@ module Mailman
             Mailman.logger.error "Error encountered processing message: #{message.inspect}\n #{error.class.to_s}: #{error.message}\n #{error.backtrace.join("\n")}"
             next
           end
-          @connection.store(message, "+FLAGS", @done_flags)
+          @connection.store(message, "-FLAGS", @done_flags)
         end
         # Clears messages that have the Deleted flag set
         @connection.expunge
