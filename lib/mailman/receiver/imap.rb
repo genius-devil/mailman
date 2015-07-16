@@ -68,6 +68,7 @@ module Mailman
       # flagging them as done.
       def get_messages
         @connection.search(@filter).each do |message|
+          message_flags = @connection.fetch(message,"FLAGS")[0].attr["FLAGS"]
           body = @connection.fetch(message, "RFC822")[0].attr["RFC822"]
           begin
             @processor.process(body)
@@ -75,7 +76,9 @@ module Mailman
             Mailman.logger.error "Error encountered processing message: #{message.inspect}\n #{error.class.to_s}: #{error.message}\n #{error.backtrace.join("\n")}"
             next
           end
-          @connection.store(message, "-FLAGS", @done_flags)
+          unless message_flags.include?(Net::IMAP::SEEN)
+            @connection.store(message, "-FLAGS", @done_flags)
+          end
         end
         # Clears messages that have the Deleted flag set
         @connection.expunge
